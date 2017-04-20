@@ -31,7 +31,8 @@ RUN mkdir -p /var/log/nginx /var/cache/nginx
 RUN cd /root && curl -L https://github.com/arut/nginx-rtmp-module/archive/v1.1.7.tar.gz > nginx-rtmp.tgz \
     && mkdir nginx-rtmp && tar xzf nginx-rtmp.tgz -C nginx-rtmp --strip 1 
 
-RUN mkdir /www && cp /root/nginx-rtmp/stat.xsl /www/info.xsl && chown -R nginx:nginx /www
+RUN mkdir /www && chown -R nginx:nginx /www
+RUN mkdir /www-internal && cp /root/nginx-rtmp/stat.xsl /www-internal/info.xsl && chown -R nginx:nginx /www-internal
 
 RUN cd /root \
     && curl -L -O http://nginx.org/download/nginx-1.8.1.tar.gz \
@@ -74,18 +75,21 @@ RUN cd /root \
         --with-ipv6 \
    && make install
 
+RUN cd /root && curl -L https://github.com/kelseyhightower/confd/releases/download/v0.12.0-alpha3/confd-0.12.0-alpha3-linux-amd64 > confd \
+    && mv confd /usr/local/bin/confd && chmod +x /usr/local/bin/confd
+
+ADD templates/nginx.conf.tmpl /etc/confd/templates/nginx.conf.tmpl
+ADD conf.d/nginx.toml /etc/confd/conf.d/nginx.toml
+
 RUN ldconfig
 
 EXPOSE 80
 EXPOSE 1935
 
-RUN mkdir -p /etc/nginx/templates
-
-ADD sbin/substitute-env-vars.sh /usr/sbin/substitute-env-vars.sh
-ADD sbin/render-templates.sh /usr/sbin/render-templates.sh
 ADD sbin/entrypoint.sh /usr/sbin/entrypoint.sh
+ADD sbin/confd-reload-nginx.sh /usr/sbin/confd-reload-nginx.sh
 
-ADD templates/nginx.conf.tmpl /etc/nginx/templates/nginx.conf.tmpl
+VOLUME /www
 
 ENTRYPOINT ["/usr/sbin/entrypoint.sh"]
 CMD ["/usr/sbin/nginx", "-c", "/etc/nginx/nginx.conf"]
