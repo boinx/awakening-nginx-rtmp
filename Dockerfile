@@ -31,7 +31,8 @@ RUN mkdir -p /var/log/nginx /var/cache/nginx
 RUN cd /root && curl -L https://github.com/arut/nginx-rtmp-module/archive/v1.1.7.tar.gz > nginx-rtmp.tgz \
     && mkdir nginx-rtmp && tar xzf nginx-rtmp.tgz -C nginx-rtmp --strip 1 
 
-RUN mkdir /www && cp /root/nginx-rtmp/stat.xsl /www/info.xsl && chown -R nginx:nginx /www
+RUN mkdir /www && chown -R nginx:nginx /www
+RUN mkdir /www-internal && cp /root/nginx-rtmp/stat.xsl /www-internal/info.xsl && chown -R nginx:nginx /www-internal
 
 RUN cd /root \
     && curl -L -O http://nginx.org/download/nginx-1.8.1.tar.gz \
@@ -87,6 +88,8 @@ EXPOSE 1935
 
 ADD sbin/entrypoint.sh /usr/sbin/entrypoint.sh
 ADD sbin/confd-reload-nginx.sh /usr/sbin/confd-reload-nginx.sh
+
+VOLUME /www
 
 ENTRYPOINT ["/usr/sbin/entrypoint.sh"]
 CMD ["/usr/sbin/nginx", "-c", "/etc/nginx/nginx.conf"]
