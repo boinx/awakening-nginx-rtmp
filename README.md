@@ -1,4 +1,4 @@
-# awakening-nginx-rtmp
+# nginx-rtmp
 
 Live streaming video server for Flash, iOS and Android
 
@@ -63,6 +63,10 @@ The stream can be viewed at `rtmp://{your-server}/player/{your-stream-name}`.
 
 HLS playlists are available at `http://{{your-server}/hls/{your-stream-name}.m3u8`.
 
+## Playback Website
+
+For easy access to the media streams, a custom index.html file containing a video player element (and other resources) can be mounted to the container's `/www` path.
+
 ## Statistics
 
 The following resources are available:
@@ -77,14 +81,6 @@ You can visit these protected resources by visiting `/p/{token}/{resource-name}`
 ```
 echo -n '{resource-name}{PUBLISH_SECRET}' | openssl md5 -hex
 ```
-
-## Deprecated environment variables
-
-These environment variables are deprecated.
-They still work but may be removed in the future.
-
- - `PUBLISH_SECRET`, use `LIVE_SECRET` instead
- - `HTTP_CORS_ORIGIN`, use `LIVE_CORS` instead
 
 ## License
 
